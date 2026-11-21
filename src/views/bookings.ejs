@@ -1,0 +1,80 @@
+<%- include('./partials/header') %>
+
+    <section class="bookings-hero">
+        <h1>Bookings Admin</h1>
+        <p>All bookings made on Kizuna Rail.</p>
+    </section>
+
+    <section class="bookings-catalog">
+        <div class="bookings-state" id="bookings-loading">Loading bookings...</div>
+        <div class="bookings-state bookings-error" id="bookings-error" hidden></div>
+
+        <div class="bookings-grid" id="bookings-list"></div>
+
+        <template id="booking-card-template">
+            <article class="booking-card">
+                <header class="booking-card-header">
+                    <h2 data-field="code"></h2>
+                    <span class="booking-date" data-field="created"></span>
+                </header>
+
+                <dl class="booking-details" data-field="details"></dl>
+            </article>
+        </template>
+    </section>
+
+    <script>
+        async function loadBookings() {
+            const loading = document.getElementById("bookings-loading");
+            const errorBox = document.getElementById("bookings-error");
+            const list = document.getElementById("bookings-list");
+            const template = document.getElementById("booking-card-template");
+
+            try {
+                const response = await fetch("/api/bookings");
+
+                if (!response.ok) {
+                    throw new Error("Request failed with status " + response.status);
+                }
+
+                const bookings = await response.json();
+
+                bookings.forEach((booking) => {
+                    const { _id, __v, id, createdAt, ...details } = booking;
+                    const card = template.content.cloneNode(true);
+
+                    card.querySelector('[data-field="code"]').textContent = id;
+                    card.querySelector('[data-field="created"]').textContent = createdAt
+                        ? new Date(createdAt).toLocaleString()
+                        : "";
+
+                    const detailsList = card.querySelector('[data-field="details"]');
+
+                    Object.entries(details).forEach(([key, value]) => {
+                        const row = document.createElement("div");
+                        const term = document.createElement("dt");
+                        const description = document.createElement("dd");
+
+                        term.textContent = key;
+                        description.textContent =
+                            typeof value === "object" ? JSON.stringify(value) : value;
+
+                        row.append(term, description);
+                        detailsList.appendChild(row);
+                    });
+
+                    list.appendChild(card);
+                });
+            } catch (error) {
+                console.error("Error loading bookings:", error);
+                errorBox.textContent = "Failed to load bookings.";
+                errorBox.hidden = false;
+            } finally {
+                loading.hidden = true;
+            }
+        }
+
+        loadBookings();
+    </script>
+
+    <%- include('./partials/footer') %>
