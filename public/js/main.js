@@ -10,7 +10,7 @@ const hookRegionSorter = () => {
             } else {
                 url.searchParams.delete('region');
             }
-            
+
             window.location.href = url.toString();
         });
     }
@@ -88,8 +88,109 @@ const hookTrainsCatalog = async () => {
     }
 };
 
+const MONTH_NAMES = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+const hookTripSchedules = () => {
+    const container = document.getElementById('trip-schedules');
+    const monthSelect = document.getElementById('schedule-month');
+    const listEl = document.getElementById('schedules-list');
+    const templateEl = document.getElementById('schedule-card-template');
+    const loadingEl = document.getElementById('schedules-loading');
+    const errorEl = document.getElementById('schedules-error');
+    const emptyEl = document.getElementById('schedules-empty');
+
+    if (!container || !monthSelect || !listEl || !templateEl) {
+        return;
+    }
+
+    const tripId = container.dataset.tripId;
+
+    // Used to ignore slow responses if the user changes the month again before they arrive.
+    let latestRequest = 0;
+
+    const showMessage = (el, text) => {
+        loadingEl.hidden = true;
+        errorEl.hidden = true;
+        emptyEl.hidden = true;
+        if (el) {
+            el.hidden = false;
+            el.textContent = text;
+        }
+    };
+
+    const renderSchedules = (schedules) => {
+        const fragment = document.createDocumentFragment();
+
+        schedules.forEach((schedule) => {
+            const card = templateEl.content.cloneNode(true);
+
+            card.querySelector('[data-field="departure"]').textContent = schedule.departureTime;
+            card.querySelector('[data-field="arrival"]').textContent = schedule.arrivalTime;
+            card.querySelector('[data-field="book"]').href = `/trips/booking/${schedule.id}`;
+
+            const daysEl = card.querySelector('[data-field="days"]');
+            schedule.daysOfWeek.forEach((day) => {
+                const badge = document.createElement('span');
+                badge.className = 'day-badge';
+                badge.textContent = day.substring(0, 3);
+                daysEl.appendChild(badge);
+            });
+
+            fragment.appendChild(card);
+        });
+
+        listEl.replaceChildren(fragment);
+    };
+
+    const loadSchedules = async () => {
+        const month = monthSelect.value;
+        const requestNumber = ++latestRequest;
+
+        let url = `/api/trips/${encodeURIComponent(tripId)}/schedules`;
+        if (month) {
+            url += `?month=${encodeURIComponent(month)}`;
+        }
+
+        listEl.replaceChildren();
+        showMessage(loadingEl, 'Loading schedules...');
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Failed to load schedules (${response.status})`);
+            }
+
+            const schedules = await response.json();
+            if (requestNumber !== latestRequest) {
+                return;
+            }
+
+            if (schedules.length === 0) {
+                const where = month ? `in ${MONTH_NAMES[Number(month) - 1]}` : 'for this trip';
+                showMessage(emptyEl, `No schedules are available ${where}.`);
+                return;
+            }
+
+            showMessage(null);
+            renderSchedules(schedules);
+        } catch (error) {
+            if (requestNumber !== latestRequest) {
+                return;
+            }
+            showMessage(errorEl, 'Unable to load schedules right now. Please try again in a moment.');
+        }
+    };
+
+    monthSelect.addEventListener('change', loadSchedules);
+    loadSchedules();
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     hookRegionSorter();
     hookSeasonSorter();
     hookTrainsCatalog();
+    hookTripSchedules();
 });

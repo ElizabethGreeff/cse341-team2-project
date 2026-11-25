@@ -3,6 +3,7 @@ import schedules from './seeds/schedules.json' with { type: 'json' };
 import stations from './seeds/stations.json' with { type: 'json' };
 import ticketClasses from './seeds/ticket-classes.json' with { type: 'json' };
 import trains from './seeds/trains.json' with { type: 'json' };
+import { ensureRolesExist } from '../models/roles.js';
 
 const starterCollections = [
   ['trips', trips],
@@ -26,6 +27,8 @@ const initializeDatabase = async (db) => {
   const confirmations = db.collection('confirmations');
   await confirmations.deleteMany({});
   await confirmations.createIndex({ id: 1 }, { unique: true });
+  
+  await ensureRolesExist();
 };
 
 export { initializeDatabase, starterCollections };
