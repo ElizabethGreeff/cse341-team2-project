@@ -93,6 +93,7 @@
 
             <div class="schedule-filter">
                 <label for="schedule-month">Month</label>
+                <!-- Allow Month selection  -->
                 <select id="schedule-month">
                     <option value="">All months</option>
                     <option value="1">January</option>
@@ -110,12 +111,17 @@
                 </select>
             </div>
 
+            <!-- Provide loading feedback -->
             <p class="schedules-state" id="schedules-loading">Loading schedules...</p>
+            <!-- API handling errors -->
             <p class="schedules-state schedules-error" id="schedules-error" hidden></p>
+            <!-- Handle empty state when no schedules are available -->
             <p class="schedules-state" id="schedules-empty" hidden></p>
 
+            <!-- Display the list of schedules in a grid format, which will be populated dynamically via JavaScript. -->
             <div class="schedules-grid" id="schedules-list"></div>
 
+            <!-- Display schedules card template, which will be used to dynamically generate schedule cards based on the fetched data. The template includes departure and arrival times, operating days. -->
             <template id="schedule-card-template">
                 <div class="schedule-card">
                     <div class="schedule-times">
@@ -130,6 +136,7 @@
                         </div>
                     </div>
                     <div class="schedule-days" data-field="days"></div>
+                    <!-- Provide a "Book Now" button that allows users to book the selected schedule. The button will be dynamically populated with the appropriate booking link or action based on the schedule data. -->
                     <a href="#" class="book-btn" data-field="book">Book Now</a>
                 </div>
             </template>
