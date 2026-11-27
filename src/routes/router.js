@@ -1,4 +1,4 @@
-import railTripsRouter from './trips.js';
+import ejsRoutes from './ejs-routes.js';
 import apiRoutes from './api-routes.js';
 import authRoutes from './auth.js';
 import { trainsApi, trainsPage } from './trains.js';
@@ -26,7 +26,7 @@ router.use('/api', apiRoutes);
 router.use('/', authRoutes);
 
 // Rail trips
-router.use('/trips', railTripsRouter);
+router.use('/trips', ejsRoutes);
 
 // Test 500 error page
 router.get('/500', testErrorPage);
