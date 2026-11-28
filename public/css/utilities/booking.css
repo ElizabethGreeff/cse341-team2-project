@@ -565,3 +565,41 @@ article.booking-page {
         }
     }
 }
+/* Disabled ticket class card state when unavailable for the selected day */
+article.booking-page .booking-form .ticket-selection .ticket-availability-status {
+    margin: 0 0 var(--space-md) 0;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    background-color: #fff3cd;
+    color: #664d03;
+    font-size: var(--font-size-sm);
+}
+
+article.booking-page .booking-form .ticket-selection .ticket-options .ticket-card.disabled {
+    opacity: 0.45;
+    filter: grayscale(100%);
+    cursor: not-allowed;
+    background-color: #f1f3f5;
+    border-color: var(--clr-border);
+    box-shadow: none;
+}
+
+article.booking-page .booking-form .ticket-selection .ticket-options .ticket-card.disabled:hover {
+    border-color: var(--clr-border);
+    box-shadow: none;
+}
+
+article.booking-page .booking-form .ticket-selection .ticket-options .ticket-card .ticket-unavailable-badge {
+    display: inline-block;
+    align-self: flex-start;
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-sm, 4px);
+    background-color: #dee2e6;
+    color: #495057;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+article.booking-page .booking-form .ticket-selection .ticket-options .ticket-card .ticket-unavailable-badge[hidden] {
+    display: none;
+}
